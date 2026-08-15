@@ -6,11 +6,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}header{padding:12px 16px;background:#17375e;color:white;display:flex;justify-content:space-between;align-items:center}header h1{font-size:18px;margin:0}.status{font-size:12px;opacity:.85}.panel{padding:12px;background:white;border-bottom:1px solid #d9e0e8}.controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}.field label{display:block;font-size:11px;font-weight:700;color:#536176;margin-bottom:4px}.field input,.field select,button{width:100%;padding:9px;border:1px solid #c8d1dc;border-radius:7px;background:white}button{font-weight:700;cursor:pointer}.primary{background:#17375e;color:white;border-color:#17375e}.secondary{background:#edf3f9}.actions{display:flex;gap:8px;margin-top:10px}.actions button{width:auto}.hint{font-size:12px;color:#66758a;margin:8px 0 0}#map{height:58vh;min-height:390px}.summary{padding:10px 14px;background:white;border-top:1px solid #d9e0e8}.summary strong{margin-right:16px}.notams{padding:0 12px 18px}.card{background:white;border:1px solid #dce3eb;border-radius:8px;padding:10px;margin-top:8px}.card h3{font-size:14px;margin:0 0 4px}.meta{font-size:12px;color:#657287}.empty{color:#657287;padding:12px 0}@media(max-width:700px){.controls{grid-template-columns:1fr 1fr}#map{height:52vh}.actions{flex-wrap:wrap}}
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}header{padding:12px 16px;background:#17375e;color:white;display:flex;justify-content:space-between;align-items:center}header h1{font-size:18px;margin:0}.status{font-size:12px;opacity:.85}.panel{padding:12px;background:white;border-bottom:1px solid #d9e0e8}.controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}.field label{display:block;font-size:11px;font-weight:700;color:#536176;margin-bottom:4px}.field input,.field select,button{width:100%;padding:9px;border:1px solid #c8d1dc;border-radius:7px;background:white}button{font-weight:700;cursor:pointer}.primary{background:#17375e;color:white;border-color:#17375e}.secondary{background:#edf3f9}.actions{display:flex;gap:8px;margin-top:10px}.actions button{width:auto}.hint{font-size:12px;color:#66758a;margin:8px 0 0}#map{height:58vh;min-height:390px}.summary{padding:10px 14px;background:white;border-top:1px solid #d9e0e8}.summary strong{margin-right:16px}.legs{padding:8px 14px;background:#f8fafc;border-top:1px solid #e5eaf0;font-size:12px;color:#536176;display:flex;gap:16px;flex-wrap:wrap}.notams{padding:0 12px 18px}.card{background:white;border:1px solid #dce3eb;border-radius:8px;padding:10px;margin-top:8px}.card h3{font-size:14px;margin:0 0 4px}.meta{font-size:12px;color:#657287}.empty{color:#657287;padding:12px 0}@media(max-width:700px){.controls{grid-template-columns:1fr 1fr}#map{height:52vh}.actions{flex-wrap:wrap}}
 </style>
 </head>
 <body>
-<header><h1>Soaring NOTAM — V1</h1><div class="status" id="sourceStatus">TEST DATA</div></header>
+<header><h1>Soaring NOTAM — V1.1</h1><div class="status" id="sourceStatus">TEST DATA</div></header>
 <section class="panel">
 <div class="controls">
 <div class="field"><label>DATE</label><input id="date" type="date"></div>
@@ -18,12 +18,14 @@
 <div class="field"><label>MAX ALTITUDE</label><select id="alt"><option value="3000">3000 ft</option><option value="6000" selected>6000 ft</option><option value="9500">9500 ft</option><option value="99999">Unlimited</option></select></div>
 <div class="field"><label>TASK</label><select id="taskType"><option value="triangle">Triangle</option><option value="route">Multi-point route</option></select></div>
 </div>
-<div class="actions"><button class="primary" id="start">Draw task</button><button class="secondary" id="undo">Undo point</button><button class="secondary" id="clear">Clear</button><button class="secondary" id="demo">Demo triangle</button></div>
-<p class="hint">Tap the map: HOME → TP1 → TP2. Triangle closes automatically after the third point. The shaded area is the NOTAM corridor.</p>
+<div class="actions"><button class="primary" id="start">New task</button><button class="secondary" id="undo">Undo point</button><button class="secondary" id="demo">Demo triangle</button></div>
+<p class="hint">Tap HOME → TP1 → TP2. A triangle closes automatically. Drag any point to refine the task. The shaded polygon is the selected NOTAM corridor.</p>
 </section>
 <div id="map"></div>
 <div class="summary"><strong id="taskInfo">No task</strong><strong id="count">0 relevant NOTAMs</strong></div>
+<div class="legs" id="legInfo"></div>
 <section class="notams" id="notamList"></section>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
 <script src="app.js"></script>
 </body></html>
