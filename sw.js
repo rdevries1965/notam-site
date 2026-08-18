@@ -1,4 +1,4 @@
-const CACHE='soaring-notam-v2-0-1';
+const CACHE='soaring-notam-v2-0-2';
 const CORE=['./','index.html','app.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
