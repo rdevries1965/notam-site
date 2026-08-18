@@ -7,10 +7,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}header{padding:12px 16px;background:#17375e;color:white;display:flex;justify-content:space-between;align-items:center}header h1{font-size:18px;margin:0}.status{font-size:12px;opacity:.85}.panel{padding:12px;background:white;border-bottom:1px solid #d9e0e8}.controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}.field label{display:block;font-size:11px;font-weight:700;color:#536176;margin-bottom:4px}.field input,.field select,button{width:100%;padding:9px;border:1px solid #c8d1dc;border-radius:7px;background:white}button{font-weight:700;cursor:pointer}.primary{background:#17375e;color:white;border-color:#17375e}.secondary{background:#edf3f9}.actions{display:flex;gap:8px;margin-top:10px}.actions button{width:auto}.hint{font-size:12px;color:#66758a;margin:8px 0 0}#map{height:58vh;min-height:390px}.summary{padding:10px 14px;background:white;border-top:1px solid #d9e0e8}.summary strong{margin-right:16px}.legs{padding:8px 14px;background:#f8fafc;border-top:1px solid #e5eaf0;font-size:12px;color:#536176;display:flex;gap:16px;flex-wrap:wrap}.notams{padding:0 12px 18px}.card{background:white;border:1px solid #dce3eb;border-radius:8px;padding:10px;margin-top:8px;cursor:pointer}.card:hover{border-color:#8ca8c8}.card h3{font-size:14px;margin:0 0 4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.meta{font-size:12px;color:#657287}.badge{font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:#e9eef5;color:#3c4d63}.badge.new{background:#dbeafe;color:#1d4ed8}.badge.changed{background:#fef3c7;color:#92400e}.badge.cancelled{background:#fee2e2;color:#991b1b}.empty{color:#657287;padding:12px 0}.popupmeta{font-size:12px;line-height:1.45;color:#405168;margin-top:5px}@media(max-width:700px){.controls{grid-template-columns:1fr 1fr}#map{height:52vh}.actions{flex-wrap:wrap}}
+.status.stale{color:#fde68a;opacity:1}.status.error{color:#fecaca;opacity:1}
 </style>
 </head>
 <body>
-<header><h1>Soaring NOTAM — V1.2</h1><div class="status" id="sourceStatus">TEST DATA</div></header>
+<header><h1>Soaring NOTAM — V2.0</h1><div class="status" id="sourceStatus">FAA NMS STAGING · loading…</div></header>
 <section class="panel">
 <div class="controls">
 <div class="field"><label>DATE</label><input id="date" type="date"></div>
