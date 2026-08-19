@@ -1,5 +1,5 @@
-const CACHE='soaring-notam-v2-2-1';
-const CORE=['./','index.html','app.js','relevance.js','airspace.js','manifest.webmanifest'];
+const CACHE='soaring-notam-v2-3';
+const CORE=['./','index.html','app.js','relevance.js','airspace.js','matching.js','briefing.js','briefing.html','briefing-print.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
