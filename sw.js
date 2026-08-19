@@ -1,5 +1,5 @@
-const CACHE='soaring-notam-v2-1-1';
-const CORE=['./','index.html','app.js','relevance.js','manifest.webmanifest'];
+const CACHE='soaring-notam-v2-2';
+const CORE=['./','index.html','app.js','relevance.js','airspace.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
     }).catch(()=>caches.match(request).then(r=>r||caches.match('./'))));
     return;
   }
-  if(url.pathname.endsWith('/data/notams-live.json')){
+  if(url.pathname.endsWith('/data/notams-live.json')||url.pathname.endsWith('/data/airspace-baseline.json')){
     event.respondWith(fetch(request,{cache:'no-store'}));
     return;
   }
