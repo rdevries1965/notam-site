@@ -1,7 +1,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.AirspaceMatching=api})(typeof self!=='undefined'?self:this,function(){
   const ROBUST=new Set(['EXACT','STRONG']);
-  const ACTIVATE_CONDITIONS=new Set(['CA','CC','LC','LT']);
-  const ACTIVATION=/\b(activat(?:e|ed|ion)|in force|in effect|airspace (?:is )?closed|restricted|prohibited|firing|military exercise)\b/i;
+  const ACTIVATE_CONDITIONS=new Set(['CA']);
+  const ACTIVATION=/\b(activat(?:e|ed|ion)|establish(?:ed|ment)|in force|in effect|airspace (?:is )?closed|flights? (?:are )?prohibited|firing (?:in progress|activity)|military exercise active)\b/i;
+  const CHANGE_ONLY=new Set(['CH','LT','LC']);
   function normalizeName(value){return String(value||'').toUpperCase().normalize('NFKD').replace(/[^A-Z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
   function identifiers(value){
     const text=normalizeName(value),found=new Set();
@@ -17,25 +18,19 @@
   function semantic(notam){const subject=String(notam&&notam.qcode||'').toUpperCase().replace(/^Q/,'').slice(0,2);return subject.startsWith('R')||subject.startsWith('W')||ACTIVATION.test(String(notam&&notam.text||''))}
   function activationSemantics(notam){
     if(!notam||['CANCELLED','SUPERSEDED'].includes(String(notam.status||'').toUpperCase()))return false;
-    const q=String(notam.qcode||'').toUpperCase().replace(/^Q/,'');return ACTIVATE_CONDITIONS.has(q.slice(2,4))||ACTIVATION.test(String(notam.text||''));
+    const q=String(notam.qcode||'').toUpperCase().replace(/^Q/,''),condition=q.slice(2,4);return !CHANGE_ONLY.has(condition)&&(ACTIVATE_CONDITIONS.has(condition)||ACTIVATION.test(String(notam.text||'')));
   }
-  function match(airspace,notam,geometryOverlap){
+  function altitudeFeet(limit,upper=false){if(!limit||!Number.isFinite(Number(limit.value)))return upper?Infinity:0;const unit=String(limit.unit||'').toUpperCase();return unit==='FL'?Number(limit.value)*100:unit==='M'?Number(limit.value)*3.28084:Number(limit.value)}
+  function verticalOverlap(airspace,notam){const low=Math.max(altitudeFeet(airspace&&airspace.lower_limit),Number(notam&&notam.lower_ft||0)),high=Math.min(altitudeFeet(airspace&&airspace.upper_limit,true),Number((notam&&notam.upper_ft)??99999));return low<=high}
+  function alias(value){return normalizeName(value).replace(/\b(?:EH|EB|ED)\s*(?:P|R|D|TRA|TSA)\s*\d+[A-Z]?\b/g,' ').replace(/\b(?:H24|NOTAM|AREA|RESTRICTED|DANGER|PROHIBITED|TEMPORARY|RESERVED|SEGREGATED)\b/g,' ').replace(/\s+/g,' ').trim()}
+  function match(airspace,notam,geometryOverlap,vertical=verticalOverlap(airspace,notam)){
     const airIds=identifiers(`${airspace&&airspace.name||''} ${airspace&&airspace.id||''}`),notamIds=identifiers(`${notam&&notam.id||''} ${notam&&notam.text||''}`),shared=airIds.filter(id=>notamIds.includes(id));
-    const country=countryCompatible(airspace,notam),geometry=!!geometryOverlap,nameA=normalizeName(airspace&&airspace.name),nameN=normalizeName(notam&&notam.text),nameSignal=nameA.length>=6&&nameN.includes(nameA);
+    const country=countryCompatible(airspace,notam),geometry=!!geometryOverlap,nameA=normalizeName(airspace&&airspace.name),nameN=normalizeName(notam&&notam.text),localAlias=alias(airspace&&airspace.name),nameSignal=(nameA.length>=6&&nameN.includes(nameA))||(localAlias.length>=5&&nameN.includes(localAlias)),controlled=new Set([4,5,6,7,13,14,36]).has(Number(airspace&&airspace.type_code));
     let confidence='NONE';
-    if(shared.length&&country&&geometry)confidence='EXACT';
-    else if(country&&geometry&&(shared.length||nameSignal))confidence='STRONG';
-    else if((shared.length&&country)||(country&&geometry&&semantic(notam)))confidence='POSSIBLE';
-    return{confidence,identifier:shared[0]||null,signals:{identifier:!!shared.length,country,geometry,name:nameSignal,semantic:semantic(notam)}};
+    if(shared.length&&country&&geometry&&vertical)confidence='EXACT';
+    else if(country&&geometry&&vertical&&(shared.length||nameSignal))confidence='STRONG';
+    else if((shared.length&&country&&vertical)||(!controlled&&country&&geometry&&vertical&&semantic(notam)))confidence='POSSIBLE';
+    return{confidence,identifier:shared[0]||null,signals:{identifier:!!shared.length,country,geometry,vertical,name:nameSignal,semantic:semantic(notam)}};
   }
-  function statusFor(airspace,matches){
-    const robust=(matches||[]).filter(item=>ROBUST.has(item.confidence));
-    if(robust.some(item=>activationSemantics(item.notam)))return'ACTIVE BY NOTAM';
-    if(robust.length)return'NOTAM MATCH';
-    if((matches||[]).some(item=>item.confidence==='POSSIBLE'))return'POSSIBLE MATCH';
-    if(airspace&&airspace.by_notam)return'BY NOTAM – NO ACTIVATION FOUND';
-    if(airspace&&airspace.permanent_h24===true)return'PERMANENT / H24';
-    return'BASELINE ONLY';
-  }
-  return{ROBUST,activationSemantics,countryCompatible,identifiers,match,normalizeName,semantic,statusFor};
+  return{ROBUST,activationSemantics,alias,countryCompatible,identifiers,match,normalizeName,semantic,verticalOverlap};
 });

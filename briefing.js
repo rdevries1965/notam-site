@@ -1,37 +1,24 @@
-(function(root,factory){const api=factory(root.AirspaceMatching||(typeof require==='function'?require('./matching.js'):null));if(typeof module==='object'&&module.exports)module.exports=api;else root.TaskBriefing=api})(typeof self!=='undefined'?self:this,function(M){
-  const GROUP_ORDER=['HIGH_NOTAMS','MATCHED_AIRSPACE','BASELINE_AIRSPACE','OTHER_RELEVANT_NOTAMS','OTHER_NOTAMS'];
+(function(root,factory){const api=factory(root.AirspaceMatching||(typeof require==='function'?require('./matching.js'):null),root.BriefingSchedule||(typeof require==='function'?require('./schedule.js'):null),root.OperationalStatus||(typeof require==='function'?require('./operational-status.js'):null));if(typeof module==='object'&&module.exports)module.exports=api;else root.TaskBriefing=api})(typeof self!=='undefined'?self:this,function(M,S,O){
+  const GROUP_ORDER=['PERMANENT_PROHIBITED','ACTIVE_BY_NOTAM','SCHEDULED_ACTIVE','HIGH_NOTAMS','NOTAM_UNCERTAIN','POSSIBLE_MATCH','BY_NOTAM_NO_ACTIVATION','FLEXIBLE_BASELINE','CONTROLLED_BASELINE','OTHER_RELEVANT_NOTAMS','OTHER_NOTAMS'];
+  const LABELS={PERMANENT_PROHIBITED:'PERMANENT PROHIBITED',ACTIVE_BY_NOTAM:'ACTIVE BY NOTAM',SCHEDULED_ACTIVE:'SCHEDULED ACTIVE',HIGH_NOTAMS:'HIGH / TEMPORARY FAA NOTAMs',NOTAM_UNCERTAIN:'NOTAM MATCH / activation uncertain',POSSIBLE_MATCH:'POSSIBLE MATCH',BY_NOTAM_NO_ACTIVATION:'BY NOTAM — NO ACTIVATION FOUND',FLEXIBLE_BASELINE:'FLEXIBLE BASELINE / status unknown',CONTROLLED_BASELINE:'CONTROLLED BASELINE / status unknown',OTHER_RELEVANT_NOTAMS:'OTHER RELEVANT NOTAMs',OTHER_NOTAMS:'OTHER NOTAMs'};
   function stableId(kind,id,index=0){return`${kind}:${String(id||index).replace(/[^A-Za-z0-9_.:-]/g,'_')}`}
-  function activeOn(notam,date){return(!notam.valid_from||notam.valid_from.slice(0,10)<=date)&&(!notam.valid_to||notam.valid_to.slice(0,10)>=date)}
-  function lifecycle(notams,date){
-    const current=(notams||[]).filter(n=>activeOn(n,date)),replacementTargets=new Set(current.map(n=>n.replaces_id).filter(Boolean).map(String));
-    return current.filter(n=>{
-      const status=String(n.status||'').toUpperCase(),qcode=String(n.qcode||'').toUpperCase().replace(/^Q/,'');
-      return status!=='CANCELLED'&&status!=='SUPERSEDED'&&qcode.slice(2,4)!=='CN'&&!n.replaced_by_id&&!replacementTargets.has(String(n.id));
-    });
+  function reference(n){return String(n.notam_reference||n.id||'').toUpperCase().replace(/\s/g,'')}
+  function lifecycle(notams,window){
+    const all=notams||[],candidates=all.map(n=>({...n,schedule_evaluation:S.notamOverlap(n,window)})).filter(n=>n.schedule_evaluation.overlap),targets=new Set();
+    for(const n of all)for(const value of [n.replaces_id,n.cancels_reference])if(value)targets.add(String(value).toUpperCase().replace(/\s/g,''));
+    return candidates.filter(n=>{const type=String(n.notam_type||'').toUpperCase(),status=String(n.status||'').toUpperCase(),condition=String(n.qcode||'').toUpperCase().replace(/^Q/,'').slice(2,4);return type!=='NOTAMC'&&status!=='CANCELLED'&&status!=='SUPERSEDED'&&condition!=='CN'&&!n.replaced_by_id&&!targets.has(reference(n))});
   }
+  function push(map,key,value){if(!map.has(key))map.set(key,[]);map.get(key).push(value)}
   function build(options){
-    const spatialNotams=options.spatialNotams||[],allSpatialAirspaces=options.allSpatialAirspaces||[],visibleAirspaces=options.visibleAirspaces||[];
-    const operational=lifecycle(spatialNotams,options.date),matchByAirspace=new Map(),matchByNotam=new Map();
-    for(const airspace of allSpatialAirspaces)for(const notam of operational){
-      const result=M.match(airspace,notam,options.geometryOverlap(airspace,notam));if(result.confidence==='NONE')continue;
-      const association={...result,airspace,notam};
-      if(!matchByAirspace.has(airspace.id))matchByAirspace.set(airspace.id,[]);matchByAirspace.get(airspace.id).push(association);
-      if(!matchByNotam.has(notam.id))matchByNotam.set(notam.id,[]);matchByNotam.get(notam.id).push(association);
-    }
+    const operational=lifecycle(options.spatialNotams||[],options.window),matchByAirspace=new Map(),matchByNotam=new Map();
+    for(const airspace of options.allSpatialAirspaces||[])for(const notam of operational){const result=M.match(airspace,notam,options.geometryOverlap(airspace,notam));if(result.confidence==='NONE')continue;const association={...result,airspace,notam,schedule:notam.schedule_evaluation};push(matchByAirspace,airspace.id,association);push(matchByNotam,notam.id,association)}
     const notamItems=operational.map((notam,index)=>({kind:'notam',stable_id:stableId('faa',notam.id,index),notam,relevance:options.classify(notam),matches:matchByNotam.get(notam.id)||[]}));
-    const airspaceItems=visibleAirspaces.map((airspace,index)=>{const matches=matchByAirspace.get(airspace.id)||[];return{kind:'airspace',stable_id:stableId('airspace',airspace.id,index),airspace,matches,status:M.statusFor(airspace,matches)}});
-    const robustAirspace=airspaceItems.filter(item=>item.matches.some(match=>M.ROBUST.has(match.confidence)));
-    const groups={
-      HIGH_NOTAMS:notamItems.filter(item=>item.relevance==='HIGH_RELEVANCE'),
-      MATCHED_AIRSPACE:robustAirspace.sort((a,b)=>statusRank(a.status)-statusRank(b.status)||String(a.airspace.name).localeCompare(String(b.airspace.name))),
-      BASELINE_AIRSPACE:airspaceItems.filter(item=>!robustAirspace.includes(item)).sort((a,b)=>String(a.airspace.name).localeCompare(String(b.airspace.name))),
-      OTHER_RELEVANT_NOTAMS:notamItems.filter(item=>item.relevance==='RELEVANT'),
-      OTHER_NOTAMS:notamItems.filter(item=>item.relevance==='OTHER'),
-    };
-    return{version:1,generated_at_utc:new Date().toISOString(),criteria:options.criteria,groups,all:{notams:notamItems,airspaces:airspaceItems},counts:Object.fromEntries(GROUP_ORDER.map(key=>[key,groups[key].length]))};
+    const airspaceItems=(options.visibleAirspaces||[]).map((airspace,index)=>{const matches=matchByAirspace.get(airspace.id)||[],status=O.statusFor(airspace,matches,options.window);return{kind:'airspace',stable_id:stableId('airspace',airspace.id,index),airspace,matches,status}});
+    const groups=Object.fromEntries(GROUP_ORDER.map(key=>[key,[]]));for(const item of airspaceItems)groups[O.groupFor(item)].push(item);for(const item of notamItems)groups[O.groupFor(item)].push(item);
+    for(const key of GROUP_ORDER)groups[key].sort((a,b)=>(O.RANK[a.status]??9)-(O.RANK[b.status]??9)||String(a.airspace?.name||a.notam?.id).localeCompare(String(b.airspace?.name||b.notam?.id)));
+    return{version:2,generated_at_utc:new Date().toISOString(),criteria:options.criteria,group_order:GROUP_ORDER,group_labels:LABELS,groups,all:{notams:notamItems,airspaces:airspaceItems},counts:Object.fromEntries(GROUP_ORDER.map(key=>[key,groups[key].length]))};
   }
-  function statusRank(status){return{'ACTIVE BY NOTAM':0,'NOTAM MATCH':1,'POSSIBLE MATCH':2,'BY NOTAM – NO ACTIVATION FOUND':3,'PERMANENT / H24':4,'BASELINE ONLY':5}[status]??9}
-  function printState(model,sources){return{version:model.version,generated_at_utc:model.generated_at_utc,criteria:model.criteria,sources,groups:Object.fromEntries(GROUP_ORDER.filter(key=>key!=='OTHER_NOTAMS').map(key=>[key,model.groups[key].map(printItem)]))}}
-  function printItem(item){if(item.kind==='notam')return{kind:'notam',stable_id:item.stable_id,id:item.notam.id,relevance:item.relevance,text:item.notam.text,lower_ft:item.notam.lower_ft,upper_ft:item.notam.upper_ft,valid_from:item.notam.valid_from,valid_to:item.notam.valid_to,qcode:item.notam.qcode,status:item.notam.status,distance_to_task_km:item.notam.distance_to_task_km,matched_airspaces:item.matches.filter(m=>M.ROBUST.has(m.confidence)).map(m=>m.airspace.name)};return{kind:'airspace',stable_id:item.stable_id,id:item.airspace.id,name:item.airspace.name,type:item.airspace.type,country:item.airspace.country,lower_limit:item.airspace.lower_limit,upper_limit:item.airspace.upper_limit,by_notam:item.airspace.by_notam,status:item.status,matched_notams:item.matches.filter(m=>M.ROBUST.has(m.confidence)).map(m=>m.notam.id)}}
-  return{GROUP_ORDER,activeOn,build,lifecycle,printItem,printState,stableId,statusRank};
+  function printItem(item){if(item.kind==='notam')return{kind:'notam',stable_id:item.stable_id,id:item.notam.id,relevance:item.relevance,text:item.notam.text,lower_ft:item.notam.lower_ft,upper_ft:item.notam.upper_ft,valid_from:item.notam.valid_from,valid_to:item.notam.valid_to,qcode:item.notam.qcode,status:item.notam.status,schedule_evaluation:item.notam.schedule_evaluation,distance_to_task_km:item.notam.distance_to_task_km,matched_airspaces:item.matches.filter(m=>M.ROBUST.has(m.confidence)).map(m=>m.airspace.name)};return{kind:'airspace',stable_id:item.stable_id,id:item.airspace.id,name:item.airspace.name,type:item.airspace.type,country:item.airspace.country,lower_limit:item.airspace.lower_limit,upper_limit:item.airspace.upper_limit,by_notam:item.airspace.by_notam,status:item.status,activation_note:item.airspace.activation_note,matched_notams:item.matches.map(m=>`${m.notam.id} (${m.confidence})`)}}
+  function printState(model,sources){const group_order=model.group_order.filter(key=>key!=='OTHER_NOTAMS');return{version:model.version,generated_at_utc:model.generated_at_utc,criteria:model.criteria,sources,group_order,group_labels:model.group_labels,groups:Object.fromEntries(group_order.map(key=>[key,model.groups[key].map(printItem)]))}}
+  return{GROUP_ORDER,LABELS,build,lifecycle,printItem,printState,stableId};
 });
