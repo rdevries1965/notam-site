@@ -1,5 +1,6 @@
-const CACHE='soaring-notam-v2-4-1';
-const CORE=['./','index.html','app.js','relevance.js','airspace.js','schedule.js','matching.js','operational-status.js','briefing.js','briefing-ui.js','briefing.html','briefing-print.js','manifest.webmanifest'];
+const CACHE='soaring-notam-v2-4-1-r1';
+const VERSION='2.4.1-r1';
+const CORE=['./','index.html',`app.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,'briefing.html','briefing-print.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
@@ -25,7 +26,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(request,{cache:'no-store'}));
     return;
   }
-  event.respondWith(fetch(request).then(response=>{
+  event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{
     const copy=response.clone();
     caches.open(CACHE).then(cache=>cache.put(request,copy));
     return response;

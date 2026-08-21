@@ -45,4 +45,4 @@ fetch(liveUrl('data/notams-live.json'),{cache:'no-store'}).then(r=>{if(!r.ok)thr
 fetch(liveUrl('data/faa-refresh-status.json'),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(status=>{if(status&&status.source==='FAA_NMS_STAGING_REFRESH'){faaRefreshStatus=status;renderFaaStatus()}}).catch(()=>{});
 function acceptBaseline(payload){if(!payload||payload.source!=='OPENAIP'||!Array.isArray(payload.airspaces)||payload.airspace_count!==payload.airspaces.length)throw new Error();airspaces=payload.airspaces;openaipGenerated=new Date(payload.generated_at_utc);$('baselineStatus').textContent=`OpenAIP baseline · updated ${openaipGenerated.toISOString().slice(11,16)} UTC`;briefingCache.key=null;renderBriefing()}
 fetch(liveUrl('data/airspace-baseline.json'),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()}).then(acceptBaseline).catch(()=>{baselineError='OpenAIP baseline unavailable';$('baselineStatus').textContent=baselineError;$('baselineStatus').classList.add('error');renderBriefing()});
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js?v=2.4.1-r1');
