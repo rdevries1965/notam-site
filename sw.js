@@ -1,5 +1,5 @@
-const CACHE='soaring-notam-v2-6';
-const VERSION='2.6';
+const CACHE='soaring-notam-v2-6-1';
+const VERSION='2.6.1';
 const CORE=['./','index.html',`app.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,`openair-export.js?v=${VERSION}`,`notam-map.js?v=${VERSION}`,'briefing.html','briefing-print.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
