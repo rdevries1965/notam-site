@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "Controlled FAA NMS and OpenAIP validation fixture",
+  "validation_status": "COMPLETE",
+  "test_case": {"name":"EHHV central/eastern Netherlands demo triangle","date":"2026-08-21","from_local":"10:00","to_local":"18:00","timezone":"Europe/Amsterdam","max_altitude_ft":6000,"corridor_km":25,"task_coordinates":[[52.191,5.146],[52.26,6.18],[52.78,6.49],[52.191,5.146]]},
+  "source_provenance": {"faa_notam_source":"FAA_NMS_STAGING controlled normalized record","baseline_airspace_source":"OPENAIP controlled normalized record","third_party_comparator":null},
+  "expected_difference_ids": [],
+  "soaring_records": [{"id":"FAA-CONTROL-001","valid_from":"2026-08-21T08:00:00Z","valid_to":"2026-08-21T16:00:00Z","lower_ft":0,"upper_ft":6000,"geometry":{"type":"Polygon","coordinates":[[[5.1,52.1],[5.3,52.1],[5.3,52.3],[5.1,52.1]]]},"classification":"INTERNATIONAL","qcode":"QRTCA"}],
+  "records": [{"id":"FAA-CONTROL-001","valid_from":"2026-08-21T08:00:00Z","valid_to":"2026-08-21T16:00:00Z","lower_ft":0,"upper_ft":6000,"geometry":{"type":"Polygon","coordinates":[[[5.1,52.1],[5.3,52.1],[5.3,52.3],[5.1,52.1]]]},"classification":"INTERNATIONAL","qcode":"QRTCA"}],
+  "openaip_baseline": [{"id":"OPENAIP-CONTROL-PRD","type":"Restricted","type_code":1,"lower_limit":{"value":0,"unit":"FT","reference":"GND"},"upper_limit":{"value":65,"unit":"FL","reference":"STD"},"geometry":{"type":"Polygon","coordinates":[[[5.1,52.1],[5.3,52.1],[5.3,52.3],[5.1,52.1]]]}}]
+}

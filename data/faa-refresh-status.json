@@ -1,1 +1,1 @@
-{"source":"FAA_NMS_STAGING_REFRESH","last_attempt_utc":"2026-08-21T17:47:04.812813Z","success":false,"error":"FAA request failed with HTTP 403"}
+{"source":"FAA_NMS_STAGING_REFRESH","last_attempt_utc":"2026-08-21T17:54:35.444709Z","success":true,"dataset_generated_at_utc":"2026-08-21T17:54:35.348985Z","notam_count":497}
