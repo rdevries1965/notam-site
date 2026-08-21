@@ -12,9 +12,9 @@ The normal UI remains task-first: date, briefing window, maximum altitude, task 
 
 [`validation.html`](validation.html) is a developer/debug comparator. It compares normalized records by NOTAM identifier and reports presence, validity times, altitude, geometry type, classification and Q-code as `MATCH`, `INVESTIGATE`, or a documented `EXPECTED DIFFERENCE`. Comparator data never changes the production briefing engine.
 
-The reproducible initial case is stored in [`validation-data/ehhv-demo-reference.json`](validation-data/ehhv-demo-reference.json): EHHV, 2026-08-21, 10:00–18:00 Europe/Amsterdam, 6000 ft, 25 km, using the documented central/eastern Netherlands demo triangle. Its SkyGlider capture is deliberately marked `PENDING MANUAL CAPTURE` until a human records the independent result; the application never scrapes SkyGlider at runtime. To repeat the comparison, open the task in Soaring NOTAM, record the identifiers and fields shown by SkyGlider, add those records to a dated validation fixture, and inspect every disagreement rather than assuming either source is correct.
+The reproducible initial case is stored in [`validation-data/ehhv-controlled-validation.json`](validation-data/ehhv-controlled-validation.json): EHHV, 2026-08-21, 10:00–18:00 Europe/Amsterdam, 6000 ft, 25 km, using the documented central/eastern Netherlands demo triangle. Its controlled normalized FAA NMS record validates NOTAM comparison and geometry, while its controlled OpenAIP record validates baseline selection and vertical handling. These deterministic source fixtures, together with the automated time, schedule, altitude, corridor, classification and map/briefing tests, are the primary V2.6 acceptance mechanism.
 
-Future fixtures may use Helispot, LVNL Homebriefing/official PIB, or EUROCONTROL EAD without changing the production engine. An official PIB should ultimately receive the highest validation weight. SkyGlider, Helispot and other third-party sites are independent comparators, not production dependencies.
+SkyGlider, Helispot and other third-party NOTAM websites may be used for optional ad-hoc investigation only. Their filtering, selection and processing can differ, so they are neither authoritative comparators nor V2.6 acceptance requirements and never change production results. An official PIB or EUROCONTROL EAD source may later provide higher-level operational validation without changing the production engine.
 
 ## Limitations
 
@@ -22,4 +22,4 @@ Future fixtures may use Helispot, LVNL Homebriefing/official PIB, or EUROCONTROL
 - Point-only markers show a known source location, not an affected area.
 - Geometry comparison currently compares availability/type; detailed coordinate tolerance is left for a later validation fixture with trustworthy matching geometries.
 - `NO ACTIVATION FOUND` never means confirmed inactive.
-- Independent comparator captures are time-sensitive and require provenance and a capture timestamp.
+- Any optional external diagnostic capture is time-sensitive and must retain provenance; disagreement requires investigation rather than changing production logic to mimic another website.
