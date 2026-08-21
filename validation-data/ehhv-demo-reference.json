@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source": "SkyGlider NOTAM map — manual independent comparator",
+  "source_url": "https://notam.aeroclubsalland.nl/",
+  "capture_status": "PENDING MANUAL CAPTURE",
+  "captured_at_utc": null,
+  "test_case": {
+    "name": "EHHV central/eastern Netherlands demo triangle",
+    "date": "2026-08-21",
+    "from_local": "10:00",
+    "to_local": "18:00",
+    "timezone": "Europe/Amsterdam",
+    "max_altitude_ft": 6000,
+    "corridor_km": 25,
+    "task_coordinates": [[52.191, 5.146], [52.26, 6.18], [52.78, 6.49], [52.191, 5.146]]
+  },
+  "expected_difference_ids": [],
+  "soaring_records": [],
+  "records": []
+}
