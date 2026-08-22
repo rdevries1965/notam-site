@@ -1,1 +1,1 @@
-{"source":"FAA_NMS_STAGING_REFRESH","last_attempt_utc":"2026-08-22T07:47:10.056066Z","success":false,"error":"FAA request failed: URLError"}
+{"source":"FAA_NMS_STAGING_REFRESH","last_attempt_utc":"2026-08-22T08:49:29.815960Z","success":true,"dataset_generated_at_utc":"2026-08-22T08:49:29.748742Z","notam_count":487}
