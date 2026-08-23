@@ -1,6 +1,6 @@
-const CACHE='soaring-notam-v2-8-1-gate1';
-const VERSION='2.8.1';
-const CORE=['./','index.html',`app.js?v=${VERSION}`,`notam-relevance.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`activation-sources.js?v=${VERSION}`,`dynamic-airspace.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,`openair-export.js?v=${VERSION}`,`notam-map.js?v=${VERSION}`,`task-workflow.js?v=${VERSION}`,`print-state.js?v=${VERSION}`,'briefing.html',`briefing-print.js?v=${VERSION}`,'manifest.webmanifest'];
+const CACHE='soaring-notam-v2-9';
+const VERSION='2.9';
+const CORE=['./','index.html',`app.js?v=${VERSION}`,`notam-relevance.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`activation-sources.js?v=${VERSION}`,`airspace-schedule.js?v=${VERSION}`,`dynamic-airspace.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,`openair-export.js?v=${VERSION}`,`notam-map.js?v=${VERSION}`,`task-workflow.js?v=${VERSION}`,`print-state.js?v=${VERSION}`,'briefing.html',`briefing-print.js?v=${VERSION}`,'manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
