@@ -1,6 +1,6 @@
-const CACHE='soaring-notam-v2-7';
-const VERSION='2.7';
-const CORE=['./','index.html',`app.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`activation-sources.js?v=${VERSION}`,`dynamic-airspace.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,`openair-export.js?v=${VERSION}`,`notam-map.js?v=${VERSION}`,'briefing.html','briefing-print.js','manifest.webmanifest','data/dutch-dynamic-airspace.json'];
+const CACHE='soaring-notam-v2-7-1';
+const VERSION='2.7.1';
+const CORE=['./','index.html',`app.js?v=${VERSION}`,`relevance.js?v=${VERSION}`,`airspace.js?v=${VERSION}`,`schedule.js?v=${VERSION}`,`matching.js?v=${VERSION}`,`operational-status.js?v=${VERSION}`,`activation-sources.js?v=${VERSION}`,`dynamic-airspace.js?v=${VERSION}`,`briefing.js?v=${VERSION}`,`briefing-ui.js?v=${VERSION}`,`openair-export.js?v=${VERSION}`,`notam-map.js?v=${VERSION}`,'briefing.html','briefing-print.js','manifest.webmanifest'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
@@ -22,7 +22,7 @@ self.addEventListener('fetch',event=>{
     }).catch(()=>caches.match(request).then(r=>r||caches.match('./'))));
     return;
   }
-  if(url.pathname.endsWith('/data/notams-live.json')||url.pathname.endsWith('/data/airspace-baseline.json')||url.pathname.endsWith('/data/faa-refresh-status.json')){
+  if(url.pathname.endsWith('/data/notams-live.json')||url.pathname.endsWith('/data/airspace-baseline.json')||url.pathname.endsWith('/data/dutch-dynamic-airspace.json')||url.pathname.endsWith('/data/faa-refresh-status.json')){
     event.respondWith(fetch(request,{cache:'no-store'}));
     return;
   }
