@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "version": "V2.9.1",
+  "source": "NL_AIP_SUP_CURATED",
+  "country": "NL",
+  "last_reviewed_date": "2026-08-27",
+  "authoritative_inventory_url": "https://eaip.lvnl.nl/web/eaip/AIRAC%20AMDT%2010-2026_2026_10_01/eSUP/menu.html",
+  "airspace_count": 1,
+  "airspaces": [
+    {
+      "id": "nl-aip-sup-28-2026-tgb-meppel-zwolle",
+      "identifier": "TGBMEPPELZWOLLE",
+      "aliases": [
+        "TGB MEPPEL-ZWOLLE",
+        "TEMPORARY RESTRICTED AREA MEPPEL-ZWOLLE"
+      ],
+      "official_name": "Temporary Restricted Area Meppel-Zwolle",
+      "name": "TGB MEPPEL-ZWOLLE",
+      "country": "NL",
+      "type": "Restricted",
+      "type_code": 1,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [6.0961111111, 52.5088888889],
+            [6.1661111111, 52.4980555556],
+            [6.2502777778, 52.6983333333],
+            [6.1791666667, 52.7077777778],
+            [6.0961111111, 52.5088888889]
+          ]
+        ]
+      },
+      "lower_limit": {"value": 0, "unit": "FT", "reference": "GND"},
+      "upper_limit": {"value": 500, "unit": "FT", "reference": "AGL"},
+      "valid_from": "2026-08-19T22:00:00Z",
+      "valid_to": "2027-09-16T22:00:00Z",
+      "activation_schedule": [
+        {"day": 1, "h24": true},
+        {"day": 2, "h24": true},
+        {"day": 3, "h24": true},
+        {"day": 4, "h24": true}
+      ],
+      "published_activity_schedule": [
+        {
+          "days": [0, 1, 2, 3],
+          "time_basis": "UTC",
+          "local_time_basis": "Europe/Amsterdam",
+          "winter": {"start": "23:00", "end": "23:00"},
+          "summer": {"start": "22:00", "end": "22:00"},
+          "semantics": "ACTIVATION",
+          "official_text": "MON through THU, full local day; eAIP coding SUN 2300 (2200) - THU 2259 (2159)"
+        }
+      ],
+      "activation_mechanism": "AIP_SUP_SCHEDULE",
+      "source_type": "NL_AIP_SUP",
+      "sup_number": "28/2026",
+      "source_url": "https://eaip.lvnl.nl/web/eaip/AIRAC%20AMDT%2010-2026_2026_10_01/eSUP/28-2026_2026_08_20/EH-SUP-en-GB.html",
+      "official_source_url": "https://eaip.lvnl.nl/web/eaip/AIRAC%20AMDT%2010-2026_2026_10_01/eSUP/28-2026_2026_08_20/EH-SUP-en-GB.html",
+      "official_source_section": "NL AIP SUP 28/2026",
+      "publication_date": "2026-08-20",
+      "effective_date": "2026-08-20",
+      "supersedes": ["07/2026"],
+      "cancels": ["07/2026"],
+      "last_reviewed_date": "2026-08-27",
+      "baseline_source": "NL_AIP_SUP",
+      "by_notam": false,
+      "on_demand": false,
+      "on_request": false,
+      "permanent_h24": false,
+      "published_schedule_is_activation": true,
+      "outside_schedule_notam_only": false,
+      "activation": {
+        "mechanism": "AIP_SUP_SCHEDULE",
+        "authoritative_rule_source": "NL_AIP_SUP",
+        "status_sources": ["NL_AIP_SUP", "FAA_NMS_NOTAM"],
+        "source_integration": "COMPLETE",
+        "confidence": "AUTHORITATIVE_RULE"
+      },
+      "access": {
+        "status": "PROHIBITED_WITH_PUBLISHED_EXEMPTIONS",
+        "rule": "Prohibited to civil aircraft except the exemptions and coordinated flights explicitly published in NL AIP SUP 28/2026."
+      },
+      "official_activation_wording": "Active MON through THU for the full local day; consult NOTAM for latest information.",
+      "determination_capability": "POSITIVE_AND_NEGATIVE_SCHEDULE_EVIDENCE",
+      "missing_sources": [],
+      "notes": "Curated authoritative AIP SUP object; it does not depend on OpenAIP or FAA discovery."
+    }
+  ]
+}

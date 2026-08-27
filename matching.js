@@ -12,14 +12,15 @@
   function qParts(notam){const raw=String(notam?.qcode||'').toUpperCase().replace(/^Q/,'');return{subject:raw.slice(0,2),condition:raw.slice(2,4)}}
   function semantic(notam){const {subject}=qParts(notam);return subject.startsWith('R')||subject.startsWith('W')||ACTIVATION.test(String(notam?.text||''))}
   function activationSemantics(notam){if(!notam||['CANCELLED','SUPERSEDED'].includes(String(notam.status||'').toUpperCase()))return false;const {condition}=qParts(notam);return!CHANGE_ONLY.has(condition)&&(ACTIVATE_CONDITIONS.has(condition)||ACTIVATION.test(String(notam.text||'')))}
+  function deactivationSemantics(notam){const {condition}=qParts(notam),text=String(notam?.text||'');return condition==='CD'||/\b(?:deactivat(?:e|ed|ion)|not active|(?:area|restriction|activation)[^.]{0,60}(?:is )?cancelled|restriction (?:is )?suspended)\b/i.test(text)}
   function qCompatible(airspace,notam,explicit=false){const {subject}=qParts(notam),type=Number(airspace?.type_code);if(subject.startsWith('R'))return DYNAMIC.has(type);if(subject.startsWith('W'))return explicit&&DYNAMIC.has(type);return explicit&&ACTIVATION.test(String(notam?.text||''))}
   function altitudeFeet(limit,upper=false){if(!limit||!Number.isFinite(Number(limit.value)))return upper?Infinity:0;const unit=String(limit.unit||'').toUpperCase();return unit==='FL'?Number(limit.value)*100:unit==='M'?Number(limit.value)*3.28084:Number(limit.value)}
   function verticalOverlap(airspace,notam){const low=Math.max(altitudeFeet(airspace?.lower_limit),Number(notam?.lower_ft||0)),high=Math.min(altitudeFeet(airspace?.upper_limit,true),Number(notam?.upper_ft??99999));return low<=high}
   function alias(value){return normalizeName(value).replace(/\b(?:EH|EB|ED)\s*(?:P|R|D|TRA|TSA)\s*\d+[A-Z]?(?:\s+\d+)?\b|\b(?:TRA|TSA|CBA)\s*\d+[A-Z]?(?:\s+\d+)?\b/g,' ').replace(/\b(?:H24|NOTAM|AREA|RESTRICTED|DANGER|PROHIBITED|TEMPORARY|RESERVED|SEGREGATED|MON|TUE|WED|THU|FRI|SAT|SUN)\b/g,' ').replace(/\s+/g,' ').trim()}
   function geoEvidence(value){if(value&&typeof value==='object')return{overlap:value.overlap===true,kind:value.kind||'geometry',radius_km:Number(value.radius_km)||0};return{overlap:value===true,kind:'geometry',radius_km:0}}
   function match(airspace,notam,relationship,vertical=verticalOverlap(airspace,notam)){
-    const airIds=identifiers(`${airspace?.identifier||''} ${airspace?.name||''} ${airspace?.id||''}`),notamIds=identifiers(`${notam?.notam_reference||''} ${notam?.id||''} ${notam?.text||''}`),shared=airIds.filter(id=>notamIds.includes(id));
-    const country=countryCompatible(airspace,notam),geo=geoEvidence(relationship),nameN=normalizeName(notam?.text),localAlias=alias(airspace?.name),nameSignal=localAlias.length>=5&&nameN.includes(localAlias),identifierConflict=airIds.length>0&&notamIds.length>0&&!shared.length,explicit=shared.length>0||nameSignal,compatible=qCompatible(airspace,notam,explicit),broadRadius=geo.kind==='point-radius'&&geo.radius_km>50;
+    const airIds=identifiers(`${airspace?.identifier||''} ${airspace?.name||''} ${airspace?.official_name||''} ${(airspace?.aliases||[]).join(' ')} ${airspace?.id||''}`),notamIds=identifiers(`${notam?.notam_reference||''} ${notam?.id||''} ${notam?.text||''}`),shared=airIds.filter(id=>notamIds.includes(id));
+    const country=countryCompatible(airspace,notam),geo=geoEvidence(relationship),nameN=normalizeName(notam?.text),nameAliases=[airspace?.official_name,airspace?.name,...(airspace?.aliases||[])].map(alias).filter(value=>value.length>=5),nameSignal=nameAliases.some(value=>nameN.includes(value)),identifierConflict=airIds.length>0&&notamIds.length>0&&!shared.length,explicit=shared.length>0||nameSignal,compatible=qCompatible(airspace,notam,explicit),broadRadius=geo.kind==='point-radius'&&geo.radius_km>50;
     let confidence='REJECTED',reasons=[];
     if(!vertical)reasons.push('vertical bands do not overlap');
     else if(identifierConflict)reasons.push('explicit airspace identifiers conflict');
@@ -34,5 +35,5 @@
     else reasons.push('no credible identifier, name, or geographic relationship');
     return{confidence,identifier:shared[0]||null,reasons,signals:{identifier:!!shared.length,identifier_conflict:identifierConflict,country,geometry:geo.overlap,geometry_kind:geo.kind,broad_radius:broadRadius,vertical,name:nameSignal,semantic:semantic(notam),q_compatible:compatible}};
   }
-  return{ROBUST,activationSemantics,alias,countryCompatible,identifiers,match,normalizeName,qCompatible,qParts,semantic,verticalOverlap};
+  return{ROBUST,activationSemantics,deactivationSemantics,alias,countryCompatible,identifiers,match,normalizeName,qCompatible,qParts,semantic,verticalOverlap};
 });

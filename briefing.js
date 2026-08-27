@@ -7,7 +7,7 @@
   function lifecycle(notams,window){
     const all=notams||[],candidates=all.map(n=>({...n,schedule_evaluation:S.notamOverlap(n,window)})).filter(n=>n.schedule_evaluation.overlap),targets=new Set();
     for(const n of all)for(const value of [n.replaces_id,n.cancels_reference])if(value)targets.add(String(value).toUpperCase().replace(/\s/g,''));
-    return candidates.filter(n=>{const type=String(n.notam_type||'').toUpperCase(),status=String(n.status||'').toUpperCase(),condition=String(n.qcode||'').toUpperCase().replace(/^Q/,'').slice(2,4);return type!=='NOTAMC'&&status!=='CANCELLED'&&status!=='SUPERSEDED'&&condition!=='CN'&&!n.replaced_by_id&&!targets.has(reference(n))});
+    return candidates.filter(n=>{const type=String(n.notam_type||'').toUpperCase(),status=String(n.status||'').toUpperCase(),condition=String(n.qcode||'').toUpperCase().replace(/^Q/,'').slice(2,4),ended=type==='NOTAMC'||status==='CANCELLED'||status==='SUPERSEDED'||condition==='CN';return(!ended||M.deactivationSemantics(n))&&!n.replaced_by_id&&!targets.has(reference(n))});
   }
   function push(map,key,value){if(!map.has(key))map.set(key,[]);map.get(key).push(value)}
   function build(options){
