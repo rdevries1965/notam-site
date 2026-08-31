@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  // After creating the GoatCounter site, paste its complete /count URL here.
-  // Leave empty to disable analytics without affecting the application.
-  const GOATCOUNTER_ENDPOINT = "";
+  // Official GoatCounter /count endpoint. Leave empty to disable analytics
+  // without affecting the application.
+  const GOATCOUNTER_ENDPOINT = "https://zuluecho.goatcounter.com/count";
 
   function validEndpoint(value) {
     try {

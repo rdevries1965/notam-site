@@ -19,7 +19,7 @@ function run(endpoint) {
     }
   };
   const configured = source.replace(
-    'const GOATCOUNTER_ENDPOINT = "";',
+    /const GOATCOUNTER_ENDPOINT = "[^"]*";/,
     `const GOATCOUNTER_ENDPOINT = ${JSON.stringify(endpoint)};`
   );
   vm.runInNewContext(configured, context);
@@ -30,6 +30,13 @@ test("analytics is inert while no real endpoint is configured", () => {
   const result = run("");
   assert.equal(result.appended.length, 0);
   assert.equal(result.context.window.goatcounter, undefined);
+});
+
+test("repository config uses the official GoatCounter endpoint", () => {
+  assert.match(
+    source,
+    /const GOATCOUNTER_ENDPOINT = "https:\/\/zuluecho\.goatcounter\.com\/count";/
+  );
 });
 
 test("configured analytics loads official script asynchronously and sends pathname only", () => {
