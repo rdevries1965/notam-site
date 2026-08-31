@@ -6,9 +6,10 @@
     const generated=validDate(payload?.generated_at_utc),refreshGenerated=validDate(refreshStatus?.dataset_generated_at_utc),current=validDate(now);
     const age=generated&&current?(current.getTime()-generated.getTime())/60000:null;
     const firCoverage=Object.fromEntries(REQUIRED_FIRS.map(fir=>[fir,Number.isInteger(payload?.fir_counts?.[fir])&&payload.fir_counts[fir]>=0]));
-    const payloadValid=payload?.source==='FAA_NMS_STAGING'&&Array.isArray(payload?.notams)&&Number.isInteger(payload?.total_unique_notam_count)&&payload.total_unique_notam_count===payload.notams.length;
+    const sourceEnvironment=payload?.source==='FAA_NMS_PRODUCTION'&&payload?.environment==='production'||payload?.source==='FAA_NMS_STAGING'&&payload?.environment==='staging',expectedRefreshSource=payload?.source?`${payload.source}_REFRESH`:null;
+    const payloadValid=Boolean(sourceEnvironment)&&Array.isArray(payload?.notams)&&Number.isInteger(payload?.total_unique_notam_count)&&payload.total_unique_notam_count===payload.notams.length;
     const generatedTimestampValid=Boolean(generated&&generated.getUTCFullYear()>=2025);
-    const refreshSucceeded=refreshStatus?.source==='FAA_NMS_STAGING_REFRESH'&&refreshStatus?.success===true;
+    const refreshSucceeded=refreshStatus?.source===expectedRefreshSource&&refreshStatus?.environment===payload?.environment&&refreshStatus?.success===true;
     const refreshTimestampMatchesDataset=Boolean(generated&&refreshGenerated&&generated.getTime()===refreshGenerated.getTime());
     const refreshCountMatchesDataset=Number.isInteger(refreshStatus?.notam_count)&&refreshStatus.notam_count===payload?.total_unique_notam_count;
     const freshnessPassed=Number.isFinite(age)&&age>=0&&age<=staleMinutes;
