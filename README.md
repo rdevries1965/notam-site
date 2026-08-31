@@ -6,7 +6,7 @@ Static GitHub Pages deployment for <https://notam.rdevries.info>. The authoritat
 
 Analytics is disabled by default. After creating the GoatCounter site for `notam.rdevries.info`, open `analytics.js` and set `GOATCOUNTER_ENDPOINT` to the complete HTTPS count endpoint shown by GoatCounter. It has the form `https://<your-site-code>.goatcounter.com/count`. This is the only analytics configuration value.
 
-The official GoatCounter script is loaded asynchronously only when that value is a valid HTTPS `/count` URL. It reports the page pathname and GoatCounter's normal aggregate page-view metadata. Query parameters, task state, route coordinates, turnpoints, briefing settings, NOTAM contents and FAA data are not read or sent. Automatic click/event tracking is disabled.
+The official GoatCounter script is loaded asynchronously only when that value is a valid HTTPS `/count` URL. It reports the page pathname and GoatCounter's basic aggregate browser/device metadata. Referrer reporting and automatic click/event tracking are disabled. Query parameters, task state, route coordinates, turnpoints, briefing settings, NOTAM contents and FAA data are not read or sent.
 
 `index.html` and the user-facing print page `briefing.html` are instrumented. The developer-only `validation.html` page is intentionally excluded.
 

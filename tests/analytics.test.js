@@ -13,7 +13,8 @@ function run(endpoint) {
     URL,
     window: { location: { pathname: "/briefing.html", search: "?task=secret" } },
     document: {
-      createElement: () => ({ dataset: {} }),
+      referrer: "https://previous.example/flight?task=secret-coordinates",
+      createElement: (tagName) => ({ dataset: {}, tagName }),
       head: { appendChild: (node) => appended.push(node) }
     }
   };
@@ -34,11 +35,16 @@ test("analytics is inert while no real endpoint is configured", () => {
 test("configured analytics loads official script asynchronously and sends pathname only", () => {
   const endpoint = "https://real-site-code.goatcounter.com/count";
   const result = run(endpoint);
-  assert.equal(result.appended.length, 1);
-  assert.equal(result.appended[0].src, "https://gc.zgo.at/count.js");
-  assert.equal(result.appended[0].async, true);
-  assert.equal(result.appended[0].dataset.goatcounter, endpoint);
+  assert.equal(result.appended.length, 2);
+  assert.equal(result.appended[0].tagName, "meta");
+  assert.equal(result.appended[0].name, "referrer");
+  assert.equal(result.appended[0].content, "no-referrer");
+  assert.equal(result.appended[1].src, "https://gc.zgo.at/count.js");
+  assert.equal(result.appended[1].async, true);
+  assert.equal(result.appended[1].referrerPolicy, "no-referrer");
+  assert.equal(result.appended[1].dataset.goatcounter, endpoint);
   assert.equal(result.context.window.goatcounter.no_events, true);
+  assert.equal(result.context.window.goatcounter.referrer, "");
   assert.equal(result.context.window.goatcounter.path(), "/briefing.html");
   assert.doesNotMatch(result.context.window.goatcounter.path(), /secret/);
 });
@@ -47,6 +53,16 @@ test("invalid or non-HTTPS endpoints cannot load analytics", () => {
   for (const endpoint of ["not-a-url", "http://example.test/count", "https://example.test/other"]) {
     assert.equal(run(endpoint).appended.length, 0);
   }
+});
+
+test("a sensitive document referrer cannot be sent to GoatCounter", () => {
+  const result = run("https://real-site-code.goatcounter.com/count");
+  assert.match(result.context.document.referrer, /task=secret-coordinates/);
+  assert.equal(result.context.window.goatcounter.referrer, "");
+  assert.doesNotMatch(
+    JSON.stringify(result.context.window.goatcounter),
+    /secret-coordinates|previous\.example/
+  );
 });
 
 test("only user-facing pages are instrumented and privacy text is in Help", () => {
@@ -64,6 +80,7 @@ test("analytics cannot inspect operational state or URL query data", () => {
   assert.doesNotMatch(source, /location\.search|localStorage|sessionStorage|document\.cookie/);
   assert.doesNotMatch(source, /querySelector|getElementById|addEventListener/);
   assert.match(source, /no_events:\s*true/);
+  assert.match(source, /referrer:\s*""/);
 });
 
 test("analytics is not a required service-worker shell resource", () => {
